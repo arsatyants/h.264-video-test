@@ -1,17 +1,40 @@
 # h.264-video-test
 
-Benchmark of the video stream limits of a Raspberry Pi Zero 2 W with Camera Module 3 (IMX708):
-frame rate, CPU load, and bitrate received over a UDP socket on another machine.
+Measurements of the real-time video streaming limits of a **Raspberry Pi Zero 2 W with Camera Module 3 (IMX708)**:
+how many frames per second and which resolutions the board can produce, how much CPU each codec costs, how much bitrate gets
+through a UDP socket over Wi-Fi, how to tune the pipeline for low latency, and the end-to-end (glass-to-glass) delay.
 
-## Scripts
-- `local_bench.py` — run **on the Pi** (`python3 local_bench.py`): fps / CPU / RSS per mode, output to `/dev/null`.
-- `udp_bench.py` — run **on the receiving host**: opens a UDP socket per test, starts `remote_bench.py` on the Pi over ssh
-  (`rpicam-vid -o udp://HOST:PORT`) and measures received Mbit/s in a steady 8 s window (after 5 s warm-up).
+**Setup:** Pi Zero 2 W (Raspberry Pi OS, libcamera / `rpicam-vid`) sends video over Wi-Fi via UDP to a Raspberry Pi 5 on the same LAN.
+Codecs under test: raw YUV420 (ISP output), hardware H.264 (`bcm2835-codec`) and software MJPEG.
+
+## Key results
+- Hardware H.264 works up to **1920x1080@30** (or 720p@60); wider than 1920 px fails to start. It costs only ~7-12 % total CPU and ~10 Mbit/s.
+- Raw YUV420 is gigabits/s and collapses to ~53 Mbit/s and 0.4-3.4 fps over Wi-Fi. MJPEG is encoded on the CPU (57-87 % load).
+- Pipeline latency (sensor timestamp -> UDP receive) is ~180 ms at 1080p30 by default and drops to ~45-90 ms with
+  `--flush --buffer-count 3-4 --denoise cdn_off`; the camera then drops frames instead of buffering them.
+- Glass-to-glass at 720p60: **179 ms** by default, **139 ms** with the low-latency flags.
+
+## Files
+| File | Where it runs | Purpose |
+|---|---|---|
+| `local_bench.py` | Pi Zero | fps / CPU / RSS per codec and resolution, output to `/dev/null` |
+| `udp_bench.py` + `remote_bench.py` | receiving host (starts the Pi side over ssh) | received Mbit/s over a UDP socket per mode |
+| `h264_matrix.py` | receiving host | H.264 matrix: resolution x fps x target bitrate |
+| `latency_test.py` + `remote_latency.py` | receiving host | per-frame latency: sensor timestamp -> UDP receive (clock offset by UDP ping-pong) |
+| `glass2glass.py` | host with a display (Pi 5) | on-screen stopwatch + live video; camera looks at the screen |
+| `visual_test.sh` | receiving host | decodes the stream with ffmpeg low-delay and saves a JPEG per second |
+| `results/` | | raw result tables and zoomed glass-to-glass evidence |
+
+## Requirements
+Pi Zero side: `rpicam-apps`, Python 3. Host side: Python 3, `ffmpeg`, `sshpass` (only if you use `PI_PASS`); `glass2glass.py` also needs `pygame`.
+All host scripts read the environment: `LOCAL_IP` (host IP seen by the Pi), `PI_TARGET` (`user@pi-host`), optional `PI_PASS` (otherwise ssh keys).
 
 ```
 LOCAL_IP=192.168.x.y PI_TARGET=user@pi-host [PI_PASS=...] python3 udp_bench.py
+LOCAL_IP=... PI_TARGET=... python3 h264_matrix.py
+LOCAL_IP=... PI_TARGET=... [LAT_SET=flags] python3 latency_test.py
+LOCAL_IP=... PI_TARGET=... python3 glass2glass.py TAG SECONDS [rpicam-vid flags]   # run in a graphical session
 ```
-Without `PI_PASS`, ssh keys are used. Requires `sshpass` only when `PI_PASS` is set.
 
 ## Findings (see `results/results.txt`)
 - Hardware H.264 encoder (`bcm2835-codec`) accepts at most 1920x1920, so 2304x1296 and up fail to start. Practical limit: 1080p30 (or 720p60), ~7-9 % total CPU, ~10 Mbit/s.
