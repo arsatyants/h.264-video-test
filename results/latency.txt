@@ -1,0 +1,35 @@
+Latency = UDP receive time on host - sensor timestamp (host clock via NTP + UDP ping-pong offset, ~9-10 ms measured, subtracted). Target bitrate 8 Mbit/s.
+drift = median latency in last 3 s minus first 3 s of the 8 s window (growth => buffer accumulating). rx/tx fr = frames received / frames produced.
+
+-- set "main": default vs --flush vs lowlat (--flush --buffer-count 3 --denoise cdn_off --intra 30 --inline --profile baseline)
+res@fps     config      fps  lat med    p95    max  drift  rx/tx fr  Mb/s CPU% off ms
+1920x1080@30default    29.2      184    198    218     -0   426/426   7.7    9    9.2
+1920x1080@30flush      29.2      182    199    216     -0   428/428   7.7    9    9.3
+1920x1080@30lowlat     25.5      154    190    203     74   374/376   6.8    9    9.3
+1920x1080@60default    36.8      153    161    169      0   542/542   4.8    9    9.3
+1920x1080@60flush      36.6      158    189    196     27   539/540   4.8   10    9.3
+1920x1080@60lowlat     36.4       67     77     86      1   540/540   4.8   10    9.4
+1280x720@60 default    59.8       77     87    112     -1   886/886   8.0   11    9.4
+1280x720@60 flush      59.8       77     90    104     -7   886/886   8.0   12    9.4
+1280x720@60 lowlat     52.6       44     53     63      1   780/780   7.1   11    9.5
+640x480@60  default    60.1       37     43     76      0   891/891   8.0   10    9.5
+640x480@60  flush      60.1       53     57     63      1   890/891   8.0   10    9.5
+640x480@60  lowlat     60.1       50     56     65     -0   890/891   8.0   10    9.5
+
+-- set "flags": --flush plus buffer-count / denoise / GOP+baseline separately
+res@fps     config      fps  lat med    p95    max  drift  rx/tx fr  Mb/s CPU% off ms
+1920x1080@30bc2        15.0      105    117    121      1   220/220   4.0    6    9.6
+1920x1080@30bc3        22.5      107    120    168      1   332/332   6.0    8    9.6
+1920x1080@30bc4        28.0      119    134    142     -1   411/411   7.5   10    9.7
+1920x1080@30bc3+dn     22.6       95    103    114      1   333/333   6.0    8    9.7
+1920x1080@30bc3+gop    22.6       97    108    121      0   333/333   6.0    8    9.7
+1920x1080@60bc2        22.8       81     91     99     -1   336/336   3.0    8    9.8
+1920x1080@60bc3        31.9       84     94    131     -1   473/473   4.3    9    9.8
+1920x1080@60bc4        38.5       93    105    118     -1   571/571   5.1   13    9.8
+1920x1080@60bc3+dn     35.8       75     82     88     -0   531/531   4.8   10    9.9
+1920x1080@60bc3+gop    32.3       84    102    119      0   478/478   4.3    9    9.9
+1280x720@60 bc2        30.1       54     59     68     -1   444/444   4.0    7   10.0
+1280x720@60 bc3        45.1       71     89    101      1   668/669   6.0   10   10.0
+1280x720@60 bc4        54.1       57     66     76      1   802/802   7.2   13   10.0
+1280x720@60 bc3+dn     45.1       48     54     67      1   669/669   6.0    9   10.0
+1280x720@60 bc3+gop    45.1       50     62     77     -0   669/669   6.0   10   10.1

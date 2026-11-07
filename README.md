@@ -92,3 +92,18 @@ mjpeg  1536x864    120   59.9       59    225         35.5     120
 mjpeg  2304x1296    56   30.9       64    246         34.5      92
 mjpeg  4608x2592    14   12.0       87    335         22.2      48
 ```
+
+## Low latency (`latency_test.py`, `visual_test.sh`)
+`--low-latency` only affects the software libav encoder. For the hardware H.264 encoder the useful knobs are
+`--flush`, a small `--buffer-count` (bounds the queue: the camera drops frames instead of buffering them),
+`--denoise cdn_off`, `--intra 30 --inline --profile baseline`. Per-frame latency is measured sensor timestamp -> UDP receive
+(clock offset to the Pi estimated by UDP ping-pong and subtracted). Full tables: `results/latency.txt`.
+
+Findings (8 Mbit/s target):
+- Default `--buffer-count` queues ~6 frames: 1080p30 = ~184 ms, 1080p60 (encoder overload, 36 fps) = ~153 ms, 720p60 = ~77 ms.
+- `--buffer-count` trades fps for latency directly: at 1080p30 bc4 = 28 fps / 119 ms, bc3 = 22.5 fps / 107 ms, bc2 = 15 fps / 105 ms. Too small a value starves the ISP->encoder pipeline.
+- `--denoise cdn_off` gives a further ~10-20 ms; GOP/baseline/inline barely changes latency (but gives fast recovery after loss).
+- Best combos: 1080p60 request (36 fps real) with full low-latency flags = 67 ms; 720p60 bc4 = 57 ms @ 54 fps; 720p60 bc3+cdn_off = 48 ms @ 45 fps.
+- Latency does not grow over time in any run (drift ~0), i.e. no unbounded buffer accumulation.
+- Visual check: `./visual_test.sh 1280x720 60` decodes the stream with `ffmpeg -fflags nobuffer -flags low_delay` and saves a JPEG/s.
+  Live view: `ffplay -fflags nobuffer -flags low_delay -framedrop -probesize 32 -analyzeduration 0 -f h264 udp://0.0.0.0:5990`.
