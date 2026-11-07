@@ -113,3 +113,11 @@ Camera turned away from the wall (person, ceiling, chandelier in view), same `la
 Latency (median, ms) static -> with motion: 1080p30 default 184 -> 175, lowlat 154 -> 90 (25 fps); 1080p60 default 153 -> 157, lowlat 67 -> 85;
 720p60 default 77 -> 93, lowlat 44 -> 46 (46 fps); 640x480@60 31 ms for all configs. No unbounded drift. Latency barely depends on the scene;
 bitrate does (the static dim scene was sensor-noise-heavy, so it was not a reliable motion indicator).
+
+## Glass-to-glass (`glass2glass.py`, `results/glass2glass.txt`)
+The Pi 5 screen shows a ms stopwatch (plus moving stripes/ball) and the live decoded video in a red frame; the camera looks at that
+screen, so the video contains the stopwatch as it was at capture. latency = clock now - clock seen in the video (read from zoomed
+screenshots, +-15 ms). 720p60, 8 Mbit/s, mean of 6 shots: **default 179 ms** (151-191), **low-latency flags 139 ms** (119-154).
+The ~40 ms gain matches the sensor-timestamp -> UDP measurement. Includes exposure, encode, Wi-Fi, decode (ffmpeg low-delay),
+scaling and drawing plus one panel latency; the last panel latency is not included. Zoomed evidence: `results/g2g_strips_*.png`.
+Gotcha: kill leftover `ffmpeg` / remote `rpicam-vid` between runs (they hold UDP port 5990 / the camera).

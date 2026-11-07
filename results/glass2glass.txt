@@ -1,0 +1,9 @@
+Glass-to-glass latency (camera -> Pi Zero 2W -> H.264/UDP over Wi-Fi -> ffmpeg low-delay decode -> pygame window on Pi 5),
+1280x720@60, 8 Mbit/s, camera pointed at the Pi 5 screen showing a ms stopwatch. latency = clock now - clock seen inside the video.
+Nested clock read by eye from zoomed screenshots (+-15 ms; exposure overlaps two 16 ms display frames, midpoint used).
+Includes: exposure, encode, Wi-Fi, decode, scale, draw, and ONE panel latency (camera sees the physical panel). Excludes the final panel latency.
+
+default  per-shot ms: 174, 185, 191, 185, 151, 186   mean 179  min 151  max 191
+lowlat   per-shot ms: 136, 152, 141, 154, 133, 119   mean 139  min 119  max 154
+
+lowlat = --flush --buffer-count 4 --denoise cdn_off --intra 30 --inline --profile baseline
