@@ -154,3 +154,13 @@ Gotcha: kill leftover `ffmpeg` / remote `rpicam-vid` between runs (they hold UDP
 - **MPEG-TS, `pkt_size=1316` (7x188)** via `--codec libav --libav-format mpegts` (hardware encoder through libav): glass-to-glass
   **163 ms vs 141 ms** for raw H.264 over UDP, i.e. ~20 ms worse. This mode also writes no per-frame metadata, so only glass-to-glass could be measured.
 Conclusion: the dominant levers remain `--buffer-count` and resolution/fps; the three tested options do not reduce latency further.
+
+## Auto exposure off
+Setting both `--shutter` and `--gain` disables auto exposure in `rpicam-vid` (verified on the Pi: 171 frames, exposure fixed at 7993 us,
+gain 3.7, `AeState` 0). Recommended low-latency set with fixed exposure:
+```
+rpicam-vid -n -t 0 --codec h264 --width 1280 --height 720 --framerate 60 --bitrate 8000000 \
+  --flush --buffer-count 4 --denoise cdn_off --shutter 8000 --gain 3.7 --intra 30 --inline --profile baseline -o udp://HOST:PORT
+```
+Pick `--shutter` <= one frame period (16.6 ms at 60 fps) and raise `--gain` as the light drops; fixed exposure never lowers the frame rate
+in the dark, but the image will be darker or noisier instead. `visual_test.sh` uses these values by default (`EXP_FLAGS=""` restores auto exposure).
