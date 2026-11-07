@@ -107,3 +107,9 @@ Findings (8 Mbit/s target):
 - Latency does not grow over time in any run (drift ~0), i.e. no unbounded buffer accumulation.
 - Visual check: `./visual_test.sh 1280x720 60` decodes the stream with `ffmpeg -fflags nobuffer -flags low_delay` and saves a JPEG/s.
   Live view: `ffplay -fflags nobuffer -flags low_delay -framedrop -probesize 32 -analyzeduration 0 -f h264 udp://0.0.0.0:5990`.
+
+### Latency on a scene with motion (`results/latency_motion.txt`)
+Camera turned away from the wall (person, ceiling, chandelier in view), same `latency_test.py` "main" set, 8 Mbit/s target.
+Latency (median, ms) static -> with motion: 1080p30 default 184 -> 175, lowlat 154 -> 90 (25 fps); 1080p60 default 153 -> 157, lowlat 67 -> 85;
+720p60 default 77 -> 93, lowlat 44 -> 46 (46 fps); 640x480@60 31 ms for all configs. No unbounded drift. Latency barely depends on the scene;
+bitrate does (the static dim scene was sensor-noise-heavy, so it was not a reliable motion indicator).
