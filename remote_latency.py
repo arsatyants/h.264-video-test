@@ -28,4 +28,4 @@ d=json.load(open(meta)); ts=[x["SensorTimestamp"]/1e9 for x in d]
 wall_minus_boot=time.time()-time.clock_gettime(time.CLOCK_BOOTTIME)
 caps=[t+wall_minus_boot+off for t in ts]          # capture time on the host clock
 fps=(len(ts)-1)/(ts[-1]-ts[0])
-print(json.dumps({"off_ms":off*1000,"rtt_ms":rtt*1000,"caps":caps,"fps":fps,"sys":100*(1-(i1-i0)/(t1-t0)),"proc":100*(c1-c0)/HZ/(w1-w0)}))
+print(json.dumps({"off_ms":off*1000,"rtt_ms":rtt*1000,"caps":caps,"fps":fps,"exp_ms":sum(x.get("ExposureTime",0) for x in d)/len(d)/1000,"sys":100*(1-(i1-i0)/(t1-t0)),"proc":100*(c1-c0)/HZ/(w1-w0)}))

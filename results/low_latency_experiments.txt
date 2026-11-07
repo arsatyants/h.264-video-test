@@ -1,0 +1,17 @@
+Low-latency experiments, 1280x720@60, 8 Mbit/s, base flags = --flush --buffer-count 4 --denoise cdn_off
+
+A) sensor timestamp -> UDP receive (latency_test.py, LAT_SET=exp REPEAT=2); exp ms = mean exposure from metadata
+res@fps     config    exp ms   fps  lat med    p95    max  drift  rx/tx fr  Mb/s CPU%
+1280x720@60 base        16.2  60.1       47     54     72     -0   889/889   8.0   13
+1280x720@60 exp8ms       8.0  60.1       47     52     68     -0   894/894   8.0   13
+1280x720@60 psoff       16.2  60.1       47     54     89     -0   891/891   8.1   13
+1280x720@60 base        16.2  60.1       96    102    114     50   888/891   8.0   14   (outlier: transient Wi-Fi/queue event)
+1280x720@60 exp8ms       8.0  60.1       47     52     64     -0   894/894   8.1   14
+1280x720@60 psoff       16.2  60.1       47     52     65      0   891/891   8.1   13
+ts1316: not measurable here (libav MPEG-TS output writes no per-frame metadata) -> see B
+base/exp8ms ran with Wi-Fi power save ON (original state), psoff with it OFF; restored to ON afterwards.
+
+B) glass-to-glass (glass2glass.py, nested stopwatch read by eye, +-15 ms), 6 shots each
+base (raw H.264 over UDP, power save on)                       153, 138, 136, 131, 136, 153  mean 141 min 131 max 153
++ --shutter 8000 --gain 3.7 (manual exposure)                  136, 144, 124, 137, 155, 137  mean 139 min 124 max 155
+MPEG-TS via libav h264_v4l2m2m, UDP pkt_size=1316 (7x188)      156, 155, 159, 159, 168, 182  mean 163 min 155 max 182

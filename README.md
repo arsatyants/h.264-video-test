@@ -144,3 +144,13 @@ screenshots, +-15 ms). 720p60, 8 Mbit/s, mean of 6 shots: **default 179 ms** (15
 The ~40 ms gain matches the sensor-timestamp -> UDP measurement. Includes exposure, encode, Wi-Fi, decode (ffmpeg low-delay),
 scaling and drawing plus one panel latency; the last panel latency is not included. Zoomed evidence: `results/g2g_strips_*.png`.
 Gotcha: kill leftover `ffmpeg` / remote `rpicam-vid` between runs (they hold UDP port 5990 / the camera).
+
+## Experiments: manual exposure, Wi-Fi power save, MPEG-TS 188-byte packets (`results/low_latency_experiments.txt`)
+720p60, 8 Mbit/s, base flags `--flush --buffer-count 4 --denoise cdn_off`.
+- **Manual exposure** (`--shutter 8000 --gain 3.7`; auto exposure used the whole 16.2 ms frame period): sensor->UDP latency 47 ms either way;
+  glass-to-glass 141 -> 139 ms, i.e. no gain resolvable within the +-15 ms reading error (digits are visibly sharper, less motion blur).
+- **Wi-Fi power save off** (`iw dev wlan0 set power_save off`): median 47 ms both ways; p95 52-54 -> 52-54, max 65-89 ms. With a steady 60 pkt/s
+  stream the radio is never idle, so power save does not add latency here. One base run had a 96 ms outlier (drift 50 ms) that did not repeat.
+- **MPEG-TS, `pkt_size=1316` (7x188)** via `--codec libav --libav-format mpegts` (hardware encoder through libav): glass-to-glass
+  **163 ms vs 141 ms** for raw H.264 over UDP, i.e. ~20 ms worse. This mode also writes no per-frame metadata, so only glass-to-glass could be measured.
+Conclusion: the dominant levers remain `--buffer-count` and resolution/fps; the three tested options do not reduce latency further.
