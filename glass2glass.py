@@ -13,7 +13,7 @@ HOST=os.environ["LOCAL_IP"]; PI=os.environ["PI_TARGET"]; PASS=os.environ.get("PI
 tag=sys.argv[1]; secs=int(sys.argv[2]); extra=sys.argv[3:]
 TS=os.environ.get("FMT")=="ts"; PORT=5990; VW,VH=480,270; OUT="g2g_out"; os.makedirs(OUT,exist_ok=True)
 SSH=["sshpass","-p",PASS,"ssh"] if PASS else ["ssh"]
-dec=subprocess.Popen(["ffmpeg","-loglevel","error","-fflags","nobuffer","-flags","low_delay","-probesize","32768","-analyzeduration","0",
+dec=subprocess.Popen(["ffmpeg","-loglevel","error","-fflags","nobuffer","-flags","low_delay",*(["-threads",os.environ["FF_THREADS"]] if os.environ.get("FF_THREADS") else []),"-probesize","32768","-analyzeduration","0",
     *(["-f","mpegts"] if TS else ["-f","h264"]),"-i",f"udp://0.0.0.0:{PORT}?fifo_size=5000000&overrun_nonfatal=1","-vf",f"scale={VW}:{VH}","-f","rawvideo","-pix_fmt","rgb24","-"],
     stdout=subprocess.PIPE,stderr=open(f"{OUT}/{tag}_ffmpeg.log","w"),bufsize=0)
 cam=subprocess.Popen(SSH+[PI,"pkill -x rpicam-vid; sleep 1; rpicam-vid -n -t %d --codec %s --framerate 60 --width 1280 --height 720 --bitrate 8000000 -o udp://%s:%d%s %s"%(secs*1000,"libav --libav-format mpegts" if TS else "h264",HOST,PORT,"?pkt_size=1316" if TS else""," ".join(extra))],

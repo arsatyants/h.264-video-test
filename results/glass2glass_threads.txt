@@ -1,0 +1,12 @@
+glass-to-glass, 3 alternating series, ffmpeg decoder default threads (off) vs -threads 1 (on); 720p60, 8 Mbit/s, base flags, 9 shots each
+clock read by eye, resolution ~16 ms
+
+off1  147, 145, 160, 161, 159, 159, 177, 143, 161  mean 157  min 143  max 177
+on1   159, 144, 144, 144, 128, 144, 160, 129, 144  mean 144  min 128  max 160
+off2  145, 144, 128, 131, 144, 129, 129, 144, 145  mean 138  min 128  max 145
+on2   144, 129, 130, 160, 144, 128, 146, 128, 138  mean 139  min 128  max 160
+off3  129, 144, 140, 144, 145, 133, 144, 128, 143  mean 139  min 128  max 145
+on3   128, 146, 161, 129, 144, 145, 147, 144, 145  mean 143  min 128  max 161
+
+default threads: series means 157, 138, 139  -> 144 ms
+-threads 1:      series means 144, 139, 143  -> 142 ms

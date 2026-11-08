@@ -172,3 +172,7 @@ the screen the camera sees. With a steady, upright camera and 9 readable shots p
 base + `--intra 30 --inline --profile baseline` **136 ms** (127-145) - no difference. Readings cluster ~16 ms apart (one frame of the 61 Hz panel),
 so the resolution is about 16 ms. The earlier 145 vs 133 ms (hand-held camera, 5 shots) was noise. Overall: ~135-140 ms glass-to-glass at 720p60.
 `results/run_*/` (raw `run_tests.sh` output) is git-ignored.
+
+### Decoder threads (`FF_THREADS=1`, `results/glass2glass_threads.txt`)
+Hypothesis: ffmpeg frame threading on the host adds latency. Three alternating series, 9 shots each, 720p60, 8 Mbit/s: default threads
+157 / 138 / 139 ms (mean 144), `-threads 1` 144 / 139 / 143 ms (mean 142). No effect; the spread between series is larger than the difference.
