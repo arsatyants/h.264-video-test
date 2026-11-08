@@ -23,6 +23,7 @@ Codecs under test: raw YUV420 (ISP output), hardware H.264 (`bcm2835-codec`) and
 | `latency_test.py` + `remote_latency.py` | receiving host | per-frame latency: sensor timestamp -> UDP receive (clock offset by UDP ping-pong) |
 | `glass2glass.py` | host with a display (Pi 5) | on-screen stopwatch + live video; camera looks at the screen |
 | `visual_test.sh` | receiving host | decodes the stream with ffmpeg low-delay and saves a JPEG per second |
+| `run_tests.sh` | receiving host | one entry point: `./run_tests.sh --help` (bench, udp, matrix, latency, latency-flags, latency-exp, visual, g2g, cleanup, all); output in `results/run_<time>/` |
 | `results/` | | raw result tables and zoomed glass-to-glass evidence |
 
 ## Requirements
