@@ -165,3 +165,10 @@ rpicam-vid -n -t 0 --codec h264 --width 1280 --height 720 --framerate 60 --bitra
 ```
 Pick `--shutter` <= one frame period (16.6 ms at 60 fps) and raise `--gain` as the light drops; fixed exposure never lowers the frame rate
 in the dark, but the image will be darker or noisier instead. `visual_test.sh` uses these values by default (`EXP_FLAGS=""` restores auto exposure).
+
+### Glass-to-glass, repeated with a steady camera (`results/glass2glass_run3.txt`, `run2`)
+`glass2glass.py` now tiles small stopwatch copies over the whole screen (`TILE=0` disables), so the nested clock is readable whatever part of
+the screen the camera sees. With a steady, upright camera and 9 readable shots per mode (720p60, 8 Mbit/s): base flags **138 ms** (129-146),
+base + `--intra 30 --inline --profile baseline` **136 ms** (127-145) - no difference. Readings cluster ~16 ms apart (one frame of the 61 Hz panel),
+so the resolution is about 16 ms. The earlier 145 vs 133 ms (hand-held camera, 5 shots) was noise. Overall: ~135-140 ms glass-to-glass at 720p60.
+`results/run_*/` (raw `run_tests.sh` output) is git-ignored.

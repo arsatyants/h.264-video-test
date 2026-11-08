@@ -31,11 +31,16 @@ def reader():
 threading.Thread(target=reader,daemon=True).start()
 pygame.init(); scr=pygame.display.set_mode((960,544),pygame.FULLSCREEN); pygame.mouse.set_visible(False)
 big=pygame.font.SysFont("dejavusansmono,monospace",118,bold=True); mid=pygame.font.SysFont("dejavusansmono,monospace",84,bold=True); small=pygame.font.SysFont("dejavusansmono,monospace",22)
+tile=pygame.font.SysFont("dejavusansmono,monospace",44,bold=True); TILE=os.environ.get("TILE","1")!="0"
 clk=pygame.time.Clock(); t_start=time.perf_counter(); last_shot=0; shots=0; log=open(f"{OUT}/{tag}.csv","w"); log.write("png,clock_now\n")
 while time.perf_counter()-t_start<secs-1:
     for e in pygame.event.get(): pass
     now=time.perf_counter(); scr.fill((0,0,0))
     cv="%06.3f"%(now%100)
+    if TILE:                                  # small clock copies over the whole screen: readable whatever part the camera sees
+        ts=tile.render(cv,True,(255,255,255))
+        for yy in range(0,544,56):
+            for xx in range(0,960,168): scr.blit(ts,(xx+(yy//56%2)*40,yy))
     # motion: sweeping stripes (top-left strip) and a bouncing ball (bottom-left strip)
     off=int(now*400)%80
     for x in range(-80+off,480,80): pygame.draw.rect(scr,(0,160,255),(x,10,40,150))

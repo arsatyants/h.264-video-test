@@ -1,0 +1,5 @@
+glass-to-glass, run 2 (run_tests.sh g2g), 1280x720@60, 8 Mbit/s, auto exposure, clock tiled over the whole screen (TILE=1),
+camera hand-held (view changes between shots). Nested clock read by eye, +-15 ms. Excluded: base #1 (camera saw the wall), lowlat #5 (overlapping digits).
+
+base (--flush --buffer-count 4 --denoise cdn_off)          144, 152, 145, 139, 147 ms  mean 145  min 139  max 152  (n=5)
+lowlat (base + --intra 30 --inline --profile baseline)     129, 118, 129, 146, 142 ms  mean 133  min 118  max 146  (n=5)

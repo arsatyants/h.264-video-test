@@ -1,0 +1,5 @@
+glass-to-glass, run 3 (run_tests.sh g2g), 1280x720@60, 8 Mbit/s, auto exposure, camera steady and upright, clock tiled over the screen.
+Nested clock read by eye from 9 shots per mode (all readable). Values cluster at ~128-130 and ~144-146 ms = one 16.4 ms display frame apart (60 Hz panel).
+
+base (--flush --buffer-count 4 --denoise cdn_off)          144, 146, 131, 146, 130, 129, 145, 131, 144 ms  mean 138  min 129  max 146  (n=9)
+lowlat (base + --intra 30 --inline --profile baseline)     144, 127, 128, 144, 130, 144, 130, 135, 145 ms  mean 136  min 127  max 145  (n=9)
